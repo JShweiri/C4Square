@@ -2,10 +2,10 @@ let canvas = document.getElementById("gc");
 
 let ctx = canvas.getContext("2d");
 
-canvas.width = 800;
-canvas.height = 800;
-
 const CIRCLE_SIZE = 90;
+
+canvas.width = CIRCLE_SIZE*8;
+canvas.height = CIRCLE_SIZE * 7;
 
 let board = [
     [0,0,0,0,0,0,0],
@@ -16,23 +16,41 @@ let board = [
     [0,0,0,0,0,0,0],
 ];
 
-player = 1;
-
 //0 is clear
 //1 is black 
 //2 is red
+player = 1;
 
-function getColHeight(x) {
+function resetGame() {
+    board = [
+        [0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0],
+    ];
+    drawBoard();
+}
+
+
+function getColHeight(board, x) {
     let y;
-    for (y = 5; board[y][x]; y--);
+    for (y = 5; y >=0 && board[y][x]; y--);
     return y;
 }
 
-function doMove(player, x) {
+function doMove(x) {
     
-    let y = getColHeight(x);
+    let y = getColHeight(board, x);
+
+    if (y < 0) {
+        console.log("Invalid move");
+        return;
+    }
 
     board[y][x] = player;
+    
     drawBoard();
 
     if(checkWin(board, player)){
@@ -40,6 +58,8 @@ function doMove(player, x) {
         ctx.font = "30px Arial";
         ctx.fillText("Player " + player +" wins!", CIRCLE_SIZE*4 - 100, 24);
     }
+
+    player = player == 1 ? 2 : 1;
 }
 
 function drawBoard() {
@@ -94,12 +114,9 @@ function oncliq(event) {
     let x = event.pageX - canvasLeft;
     //let y = event.pageY - canvasTop;
 
+    let col = Math.trunc((x - CIRCLE_SIZE / 2) / CIRCLE_SIZE);
 
-    doMove(player, Math.trunc((x-CIRCLE_SIZE/2)/CIRCLE_SIZE));
-
-    //switch
-    player+=1;
-    player = (player%3)+Math.trunc(player/3)
+    doMove(col);
 }
 
 
