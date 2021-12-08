@@ -90,7 +90,7 @@ function doMove1Player(x) {
 
     player = player == 1 ? 2 : 1;
     
-    let col, minimax_score = minimax(board, 3, true);
+    let [col, minimax_score] = minimax(board, 3, true);
 
     console.log(col);
 
@@ -225,16 +225,16 @@ function minimax(board, depth, maximizingPlayer) {
 
     if (isTerminal){
         if (checkWin(board, AI_PIECE)){
-            return (0, 100000000000000);
+            return [0, 100000000000000];
         } else if (checkWin(board, PLAYER_PIECE)) {
-            return (0, -10000000000000);
+            return [0, -10000000000000];
         } else {
-            return (0, 0);
+            return [0, 0];
         }
     }
 
     if (depth == 0) {
-        return (0, positionScore(board, AI_PIECE));
+        return [0, positionScore(board, AI_PIECE)];
     }
 
     if (maximizingPlayer) {
@@ -250,10 +250,10 @@ function minimax(board, depth, maximizingPlayer) {
             value = new_score;
             column = col;
         }
-        return column, value
+        return [column, value]
     }
     else {
-        value = Infinity
+        value = Infinity;
         column = validLocations[0];
         for (col in validLocations){
             row = getColHeight(board, col);
@@ -265,7 +265,7 @@ function minimax(board, depth, maximizingPlayer) {
             value = new_score;
             column = col;
         }
-        return column, value
+        return [column, value];
     }
 }
 
