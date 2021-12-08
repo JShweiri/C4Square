@@ -22,15 +22,20 @@ player = 1;
 //1 is black 
 //2 is red
 
-function doMove(player, x){
-
+function getColHeight(x) {
     let y;
-    for(y = 5; board[y][x]; y--);
+    for (y = 5; board[y][x]; y--);
+    return y;
+}
+
+function doMove(player, x) {
+    
+    let y = getColHeight(x);
 
     board[y][x] = player;
     drawBoard();
 
-    if(checkWin(player, x, y)){
+    if(checkWin(board, player)){
         ctx.fillStyle = "black";
         ctx.font = "30px Arial";
         ctx.fillText("Player " + player +" wins!", SIZE*4 - 100, 24);
@@ -63,18 +68,15 @@ function drawBoard(){
 
 }
 
-function checkWin(player, x, y){
-    for(let i = 1; i < 6; i++){
-         if(x+i <= 6 && y+i <= 5){
-            if(board[y][x+i] == player && board[y+i][x] == player && board[y+i][x+i] == player){
-                //console.log(x, y, i)
-                return true;
-            }
-        }
-        if(x-i >= 0 && y+i <= 5){
-            if(board[y][x-i] == player && board[y+i][x] == player && board[y+i][x-i] == player){
-                //console.log(x, y, i)
-                return true;
+function checkWin(board, player){
+    for (let x = 0; x < 7; x++) {
+        for (let y = 0; y < 6; y++) {
+            for (let n = 1; n < 6; n++){
+                if (board[y][x] == player && ((y + n) < 6) && ((x + n) < 7)){
+                    if (board[y][x] == player && board[y][x] == board[y + n][x] && board[y][x] == board[y][x + n] && board[y][x] == board[y + n][x + n]) {
+                        return true;
+                    }
+                }
             }
         }
     }
