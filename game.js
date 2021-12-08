@@ -40,7 +40,44 @@ function getColHeight(board, x) {
     return y;
 }
 
-function doMove(x) {
+function doMove1Player(x) {
+    
+    let y = getColHeight(board, x);
+
+    if (y < 0) {
+        console.log("Invalid move");
+        return;
+    }
+
+    board[y][x] = player;
+    
+    drawBoard();
+
+    if(checkWin(board, player)){
+        ctx.fillStyle = "black";
+        ctx.font = "30px Arial";
+        ctx.fillText("Player " + player +" wins!", CIRCLE_SIZE*4 - 100, 24);
+        return;
+    }
+
+    player = player == 1 ? 2 : 1;
+    
+    let col = AIMove(board);
+    let y = getColHeight(board, col);
+    board[y][x] = player;
+    
+    drawBoard();
+
+    if(checkWin(board, player)){
+        ctx.fillStyle = "black";
+        ctx.font = "30px Arial";
+        ctx.fillText("Player " + player +" wins!", CIRCLE_SIZE*4 - 100, 24);
+        return;
+    }
+
+}
+
+function doMove2Player(x) {
     
     let y = getColHeight(board, x);
 
@@ -116,7 +153,8 @@ function oncliq(event) {
 
     let col = Math.trunc((x - CIRCLE_SIZE / 2) / CIRCLE_SIZE);
 
-    doMove(col);
+    // doMove1Player(col);
+    doMove2Player(col);
 }
 
 
