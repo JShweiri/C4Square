@@ -86,7 +86,7 @@ function doMove1Player(x) {
 
     player = player == 1 ? 2 : 1;
     
-    let col = AIMove(board);
+    let col, minimax_score = minimax(board, 5, True);
     drop_piece(col);
 
 
@@ -212,8 +212,55 @@ function checkWin(board, player){
 }
 
 
+function minimax(board, depth, maximizingPlayer) {
+    let validLocations = getValidLocations(board)
+    let isTerminal = isTerminalNode(board)
 
+    if (isTerminal){
+        if (checkWin(board, AI_PIECE)){
+            return (None, 100000000000000);
+        } else if (checkWin(board, PLAYER_PIECE)) {
+            return (None, -10000000000000);
+        } else {
+            return (None, 0);
+        }
+    }
 
+    if (depth == 0) {
+        return (None, score_position(board, AI_PIECE));
+    }
+
+    if (maximizingPlayer) {
+        value = -Infinity;
+        column = validLocations[0];
+        for (col in validLocations) {
+            row = get_next_open_row(board, col);
+        }
+        b_copy = board.copy();
+        drop_piece(b_copy, row, col, AI_PIECE);
+        new_score = minimax(b_copy, depth - 1, False)[1];
+        if (new_score > value) {
+            value = new_score;
+            column = col;
+        }
+        return column, value
+    }
+    else {
+        value = Infinity
+        column = validLocations[0];
+        for (col in valid_locations){
+            row = get_next_open_row(board, col);
+        }
+        b_copy = board.copy();
+        drop_piece(b_copy, row, col, PLAYER_PIECE);
+        new_score = minimax(b_copy, depth - 1, True)[1];
+        if (new_score < value){
+            value = new_score;
+            column = col;
+        }
+        return column, value
+    }
+}
 
 function oncliq(event) {
 
