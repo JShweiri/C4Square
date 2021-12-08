@@ -21,18 +21,51 @@ let board = [
 //2 is red
 player = 1;
 
+ROW_COUNT = 6;
+COLUMN_COUNT = 7;
+
+function createBoard(rows, cols) {
+    return Array.from({
+      // generate array of length m
+      length: rows
+      // inside map function generate array of size n
+      // and fill it with `0`
+    }, () => new Array(cols).fill(0));
+  };
+
 function resetGame() {
-    board = [
-        [0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0],
-    ];
+    board = createBoard(ROW_COUNT, COLUMN_COUNT);
     drawBoard();
 }
 
+function isValidLocation(board, col) {
+    return board[0][col] == 0
+}
+
+function getValidLocations(board) {
+    locations = [];
+    for (let col = 0; col < COLUMN_COUNT; col++) {
+        if (isValidLocation(board, col)) {
+            locations.push(col);
+        }
+    }
+    return locations;
+}
+
+function drop_piece(col) {
+    //get the row
+    let row = getColHeight(board, col);
+
+    if (y < 0) {
+        console.log("Invalid move");
+        return;
+    }
+
+    //set the piece
+    board[row][col] = player;
+    //draw the piece
+    drawBoard();
+}
 
 function getColHeight(board, x) {
     let y;
@@ -42,16 +75,7 @@ function getColHeight(board, x) {
 
 function doMove1Player(x) {
     
-    let y = getColHeight(board, x);
-
-    if (y < 0) {
-        console.log("Invalid move");
-        return;
-    }
-
-    board[y][x] = player;
-    
-    drawBoard();
+    drop_piece(x);
 
     if(checkWin(board, player)){
         ctx.fillStyle = "black";
@@ -63,10 +87,8 @@ function doMove1Player(x) {
     player = player == 1 ? 2 : 1;
     
     let col = AIMove(board);
-    let row = getColHeight(board, col);
-    board[row][col] = player;
+    drop_piece(col);
 
-    drawBoard();
 
     if(checkWin(board, player)){
         ctx.fillStyle = "black";
@@ -130,6 +152,50 @@ function drawBoard() {
 
 }
 
+function isTerminalNode(board){
+    return winning_move(board, PLAYER_PIECE) || winning_move(board, AI_PIECE) || len(get_valid_locations(board)) == 0;
+}
+
+function positionScore(board, player) {
+    let score = 0;
+    for (let x = 0; x < 7; x++) {
+        for (let y = 0; y < 6; y++) {
+            for (let n = 1; n < 6; n++) {
+                if (board[y][x] == player && ((y + n) < 6) && ((x + n) < 7)) {
+                    score += evaluateSquare([board[y][x], board[y][x + n], board[y + n][x], board[y + n][x + n]], player);
+                }
+            }
+        }
+    }
+    return score;
+}
+
+function evaluateSquare(corners, player) {
+    let score = 0;
+    let numPlayer = 0;
+    let numOpposing = 0;
+    oppPlayer = player == 1 ? 2 : 1;
+    for (let i = 0; i < corners.length; i++) {
+        if (corners[i] == player) {
+            numPlayer++;
+        }
+        if (corners[i] == oppPlayer) {
+            numOpposing++;
+        }
+    }
+    if (numPlayer == 4) {
+        score += 100
+    } else if (numPlayer == 3 && numOpposing == 0) {
+        score += 5
+    } else if (numPlayer == 2 && numOpposing == 0) {
+        score += 2
+    } else if (numOpposing == 3 && numPlayer == 0) {
+        score -= 4
+    }
+
+return score
+}
+
 function checkWin(board, player){
     for (let x = 0; x < 7; x++) {
         for (let y = 0; y < 6; y++) {
@@ -144,6 +210,10 @@ function checkWin(board, player){
     }
     return false;
 }
+
+
+
+
 
 function oncliq(event) {
 
