@@ -6,13 +6,12 @@ canvas.width = 800;
 canvas.height = 800;
 
 let board = [
-    [0,0,0,0,0,0],
-    [0,0,0,0,0,0],
-    [0,0,0,0,0,0],
-    [0,0,0,0,0,0],
-    [0,0,0,0,0,0],
-    [0,0,0,0,0,0],
-    [0,0,0,0,0,0],
+    [0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0],
 ];
 
 const SIZE = 90;
@@ -26,9 +25,9 @@ player = 1;
 function doMove(player, x){
 
     let y;
-    for(y = 5; board[x][y]; y--);
+    for(y = 5; board[y][x]; y--);
 
-    board[x][y] = player;
+    board[y][x] = player;
     drawBoard();
 
     if(checkWin(player, x, y)){
@@ -43,7 +42,7 @@ function drawBoard(){
         for(let j = 0; j < board[0].length; j++){
            
             ctx.beginPath();
-            ctx.arc((i+1)*SIZE, (j+1)*SIZE, SIZE/2, 0, 2 * Math.PI);
+            ctx.arc((j+1)*SIZE, (i+1)*SIZE, SIZE/2, 0, 2 * Math.PI);
 
             if(board[i][j] == 0){
                 ctx.fillStyle = "gray";
@@ -67,32 +66,17 @@ function drawBoard(){
 function checkWin(player, x, y){
     for(let i = 1; i < 6; i++){
          if(x+i <= 6 && y+i <= 5){
-            if(board[x+i][y] == player && board[x][y+i] == player && board[x+i][y+i] == player){
+            if(board[y][x+i] == player && board[y+i][x] == player && board[y+i][x+i] == player){
                 //console.log(x, y, i)
                 return true;
             }
         }
-
-        // if(x+i <= 6 && y-i >= 0){
-        //     if(board[x+i][y] == player && board[x][y-i] == player && board[x+i][y-i] == player){
-        //         console.log(x, y, i)
-        //         return true;
-        //     }
-        // }
-
         if(x-i >= 0 && y+i <= 5){
-            if(board[x-i][y] == player && board[x][y+i] == player && board[x-i][y+i] == player){
+            if(board[y][x-i] == player && board[y+i][x] == player && board[y+i][x-i] == player){
                 //console.log(x, y, i)
                 return true;
             }
         }
-
-        // if(x-i >= 0 && y-i >= 0){
-        //     if(board[x-i][y] == player && board[x][y-i] == player && board[x-i][y-i] == player){
-        //         console.log(x, y, -i)
-        //         return true;
-        //     }
-        // }
     }
     return false;
 }
