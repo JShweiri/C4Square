@@ -4,37 +4,26 @@ let ctx = canvas.getContext("2d");
 
 const CIRCLE_SIZE = 90;
 
-canvas.width = CIRCLE_SIZE*8;
-canvas.height = CIRCLE_SIZE * 7;
+const DEPTH = 4;
 
-let board = [
-    [0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0],
-];
+const PLAYER_PIECE = 1;
+const AI_PIECE = 2;
 
+const ROW_COUNT = 6;
+const COLUMN_COUNT = 7;
 
-PLAYER_PIECE = 1;
-AI_PIECE = 2;
+canvas.width = CIRCLE_SIZE*(COLUMN_COUNT+1);
+canvas.height = CIRCLE_SIZE * (ROW_COUNT+1);
+
+let board = createBoard(ROW_COUNT, COLUMN_COUNT);
 
 //0 is clear
 //1 is black 
 //2 is red
 player = 1;
 
-ROW_COUNT = 6;
-COLUMN_COUNT = 7;
-
 function createBoard(rows, cols) {
-    return Array.from({
-      // generate array of length m
-      length: rows
-      // inside map function generate array of size n
-      // and fill it with `0`
-    }, () => new Array(cols).fill(0));
+    return Array.from({length: rows}, () => new Array(cols).fill(0));
   };
 
 function resetGame() {
@@ -43,12 +32,13 @@ function resetGame() {
 }
 
 function isValidLocation(board, col) {
-    return board[0][col] == 0
+    return board[0][col] == 0;
 }
 
 function getValidLocations(board) {
     locations = [];
     for (let col = 0; col < COLUMN_COUNT; col++) {
+        // if (col == 0) { console.log("hi: ", board); }
         if (isValidLocation(board, col)) {
             locations.push(col);
         }
@@ -56,19 +46,20 @@ function getValidLocations(board) {
     return locations;
 }
 
-function drop_piece(col) {
+function drop_piece(board, col, p) {
     //get the row
     let row = getColHeight(board, col);
 
     if (row < 0) {
-        console.log("Invalid move");
-        return;
+        throw new Error("Invalid move: " + col + " " + row);
     }
 
     //set the piece
-    board[row][col] = player;
+    board[row][col] = p;
     //draw the piece
     drawBoard();
+
+    return board;
 }
 
 function getColHeight(board, x) {
@@ -79,7 +70,7 @@ function getColHeight(board, x) {
 
 function doMove1Player(x) {
     
-    drop_piece(x);
+    board = drop_piece(board, x, player);
 
     if(checkWin(board, player)){
         ctx.fillStyle = "black";
@@ -90,11 +81,11 @@ function doMove1Player(x) {
 
     player = player == 1 ? 2 : 1;
     
-    let [col, minimax_score] = minimax(board, 3, true);
+    console.log(board);
 
-    console.log(col);
+    let [col, minimax_score] = minimax(board, DEPTH, true);
 
-    drop_piece(col);
+    board = drop_piece(board, col, player);
 
 
     if(checkWin(board, player)){
@@ -220,8 +211,8 @@ function checkWin(board, player){
 
 
 function minimax(board, depth, maximizingPlayer) {
-    let validLocations = getValidLocations(board)
-    let isTerminal = isTerminalNode(board)
+    let validLocations = getValidLocations(board);
+    let isTerminal = isTerminalNode(board);
 
     if (isTerminal){
         if (checkWin(board, AI_PIECE)){
@@ -241,29 +232,28 @@ function minimax(board, depth, maximizingPlayer) {
         value = -Infinity;
         column = validLocations[0];
         for (col in validLocations) {
-            row = getColHeight(board, col);
-        }
-        b_copy = board;
-        drop_piece(b_copy, row, col, AI_PIECE);
-        new_score = minimax(b_copy, depth - 1, false)[1];
-        if (new_score > value) {
-            value = new_score;
-            column = col;
+            let b_copy = JSON.parse(JSON.stringify(board));
+            // console.log(JSON.stringify(board));
+            b_copy = drop_piece(b_copy, col, AI_PIECE);
+            new_score = minimax(b_copy, depth - 1, false)[1];
+            if (new_score > value) {
+                value = new_score;
+                column = col;
+            }
         }
         return [column, value]
     }
     else {
         value = Infinity;
         column = validLocations[0];
-        for (col in validLocations){
-            row = getColHeight(board, col);
-        }
-        b_copy = board;
-        drop_piece(b_copy, row, col, PLAYER_PIECE);
-        new_score = minimax(b_copy, depth - 1, true)[1];
-        if (new_score < value){
-            value = new_score;
-            column = col;
+        for (col in validLocations) {
+            let b_copy = JSON.parse(JSON.stringify(board));;
+            b_copy = drop_piece(b_copy, col, PLAYER_PIECE);
+            new_score = minimax(b_copy, depth - 1, true)[1];
+            if (new_score < value) {
+                value = new_score;
+                column = col;
+            }
         }
         return [column, value];
     }
