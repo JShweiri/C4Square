@@ -16,6 +16,10 @@ let board = [
     [0,0,0,0,0,0,0],
 ];
 
+
+PLAYER_PIECE = 1;
+AI_PIECE = 2;
+
 //0 is clear
 //1 is black 
 //2 is red
@@ -56,7 +60,7 @@ function drop_piece(col) {
     //get the row
     let row = getColHeight(board, col);
 
-    if (y < 0) {
+    if (row < 0) {
         console.log("Invalid move");
         return;
     }
@@ -86,7 +90,10 @@ function doMove1Player(x) {
 
     player = player == 1 ? 2 : 1;
     
-    let col, minimax_score = minimax(board, 5, True);
+    let col, minimax_score = minimax(board, 3, true);
+
+    console.log(col);
+
     drop_piece(col);
 
 
@@ -153,7 +160,7 @@ function drawBoard() {
 }
 
 function isTerminalNode(board){
-    return winning_move(board, PLAYER_PIECE) || winning_move(board, AI_PIECE) || len(get_valid_locations(board)) == 0;
+    return checkWin(board, PLAYER_PIECE) || checkWin(board, AI_PIECE) || getValidLocations(board).length == 0;
 }
 
 function positionScore(board, player) {
@@ -218,27 +225,27 @@ function minimax(board, depth, maximizingPlayer) {
 
     if (isTerminal){
         if (checkWin(board, AI_PIECE)){
-            return (None, 100000000000000);
+            return (0, 100000000000000);
         } else if (checkWin(board, PLAYER_PIECE)) {
-            return (None, -10000000000000);
+            return (0, -10000000000000);
         } else {
-            return (None, 0);
+            return (0, 0);
         }
     }
 
     if (depth == 0) {
-        return (None, score_position(board, AI_PIECE));
+        return (0, positionScore(board, AI_PIECE));
     }
 
     if (maximizingPlayer) {
         value = -Infinity;
         column = validLocations[0];
         for (col in validLocations) {
-            row = get_next_open_row(board, col);
+            row = getColHeight(board, col);
         }
-        b_copy = board.copy();
+        b_copy = board;
         drop_piece(b_copy, row, col, AI_PIECE);
-        new_score = minimax(b_copy, depth - 1, False)[1];
+        new_score = minimax(b_copy, depth - 1, false)[1];
         if (new_score > value) {
             value = new_score;
             column = col;
@@ -248,12 +255,12 @@ function minimax(board, depth, maximizingPlayer) {
     else {
         value = Infinity
         column = validLocations[0];
-        for (col in valid_locations){
-            row = get_next_open_row(board, col);
+        for (col in validLocations){
+            row = getColHeight(board, col);
         }
-        b_copy = board.copy();
+        b_copy = board;
         drop_piece(b_copy, row, col, PLAYER_PIECE);
-        new_score = minimax(b_copy, depth - 1, True)[1];
+        new_score = minimax(b_copy, depth - 1, true)[1];
         if (new_score < value){
             value = new_score;
             column = col;
@@ -272,8 +279,8 @@ function oncliq(event) {
 
     let col = Math.trunc((x - CIRCLE_SIZE / 2) / CIRCLE_SIZE);
 
-    // doMove1Player(col);
-    doMove2Player(col);
+    doMove1Player(col);
+    // doMove2Player(col);
 }
 
 
