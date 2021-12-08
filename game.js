@@ -63,9 +63,9 @@ function doMove1Player(x) {
     player = player == 1 ? 2 : 1;
     
     let col = AIMove(board);
-    let y = getColHeight(board, col);
-    board[y][x] = player;
-    
+    let row = getColHeight(board, col);
+    board[row][col] = player;
+
     drawBoard();
 
     if(checkWin(board, player)){
@@ -74,6 +74,8 @@ function doMove1Player(x) {
         ctx.fillText("Player " + player +" wins!", CIRCLE_SIZE*4 - 100, 24);
         return;
     }
+
+    player = player == 1 ? 2 : 1;
 
 }
 
