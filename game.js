@@ -36,9 +36,8 @@ function isValidLocation(b, col) {
 }
 
 function getValidLocations(b) {
-    locations = [];
+    let locations = [];
     for (let col = 0; col < COLUMN_COUNT; col++) {
-        // if (col == 0) { console.log("hi: ", board); }
         if (isValidLocation(b, col)) {
             locations.push(col);
         }
@@ -92,6 +91,8 @@ function doMove1Player(x) {
 
     let [col, minimax_score] = minimax(board, DEPTH, true);
 
+    console.log(col + " " + minimax_score);
+
     board = drop_piece(board, col, player);
 
 
@@ -112,11 +113,6 @@ function doMove1Player(x) {
 function doMove2Player(x) {
     
     let y = getColHeight(board, x);
-
-    if (y < 0) {
-        console.log("Invalid move");
-        return;
-    }
 
     board[y][x] = player;
     
@@ -229,7 +225,6 @@ function checkWin(board, player){
 
 function minimax(b, depth, maximizingPlayer) {
   let validLocations = getValidLocations(b);
-  console.log(validLocations);
     let isTerminal = isTerminalNode(b);
 
     if (isTerminal){
@@ -247,14 +242,13 @@ function minimax(b, depth, maximizingPlayer) {
     }
 
     if (maximizingPlayer) {
-      value = -Infinity;
-      column = validLocations[Math.floor(Math.random()*validLocations.length)];
+      let value = -Infinity;
+      let column = validLocations[Math.floor(Math.random() * validLocations.length)];
       for (let i = 0; i < validLocations.length; i++) {
-        c = validLocations[i];
+        let c = validLocations[i];
         let b_copy = JSON.parse(JSON.stringify(b));
-            // console.log(JSON.stringify(board));
             b_copy = drop_piece(b_copy, c, AI_PIECE);
-            new_score = minimax(b_copy, depth - 1, false)[1];
+        let new_score = minimax(b_copy, depth - 1, false)[1];
             if (new_score > value) {
                 value = new_score;
                 column = c;
@@ -262,13 +256,13 @@ function minimax(b, depth, maximizingPlayer) {
         }
         return [column, value]
     } else {
-        value = Infinity;
-        column = validLocations[Math.floor(Math.random()*validLocations.length)];
+        let value = Infinity;
+        let column = validLocations[Math.floor(Math.random()*validLocations.length)];
       for (let i = 0; i < validLocations.length; i++) {
-          c = validLocations[i];
+          let c = validLocations[i];
           let b_copy = JSON.parse(JSON.stringify(b));
             b_copy = drop_piece(b_copy, c, PLAYER_PIECE);
-            new_score = minimax(b_copy, depth - 1, true)[1];
+            let new_score = minimax(b_copy, depth - 1, true)[1];
             if (new_score < value) {
                 value = new_score;
                 column = c;
