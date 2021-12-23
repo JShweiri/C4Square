@@ -6,61 +6,14 @@ const CIRCLE_SIZE = 90;
 
 const DEPTH = 4;
 
-const PLAYER_PIECE = 1;//Black
-const AI_PIECE = 2;//Red
+const PLAYER_PIECE = 1;
+const AI_PIECE = 2;
 
 const ROW_COUNT = 6;
 const COLUMN_COUNT = 7;
 
 canvas.width = CIRCLE_SIZE*(COLUMN_COUNT+1);
 canvas.height = CIRCLE_SIZE * (ROW_COUNT+1);
-
-// let game = {
-//     currentPiece: PLAYER_PIECE,
-//     boardWidth: COLUMN_COUNT,
-//     boardHeight: ROW_COUNT,
-//     board: Array(boardHeight).fill(0).map(() => new Array(boardWidth).fill(0)),
-//     reset() {
-//         this.board = Array(boardHeight).fill(0).map(() => new Array(boardWidth).fill(0));
-//         this.currentPiece = PLAYER_PIECE;
-//     },
-//     deepCopy() {
-//         let newBoard = Array(boardHeight).fill(0).map(() => new Array(boardWidth).fill(0));
-//         for (let i = 0; i < boardHeight; i++) {
-//             for (let j = 0; j < boardWidth; j++) {
-//                 newBoard[i][j] = this.board[i][j];
-//             }
-//         }
-//         return newBoard;
-//     },
-//     draw() {
-//         ctx.fillStyle = "lightblue";
-//         ctx.rect(0, 0, CIRCLE_SIZE * 8, CIRCLE_SIZE * 7);
-//         ctx.fill();
-//         for (let i = 0; i < boardHeight; i++) {
-//             for (let j = 0; j < boardWidth; j++) {
-//                 ctx.beginPath();
-//                 ctx.arc((j + 1) * CIRCLE_SIZE, (i + 1) * CIRCLE_SIZE, CIRCLE_SIZE / 2, 0, 2 * Math.PI);
-
-//                 if (board[i][j] == 0) {
-//                     ctx.fillStyle = "gray";
-//                 }
-
-//                 if (board[i][j] == 1) {
-//                     ctx.fillStyle = "black";
-//                 }
-
-//                 if (board[i][j] == 2) {
-//                     ctx.fillStyle = "red";
-//                 }
-
-//                 ctx.fill();
-
-//             }
-//         }
-//     },
-// };
-
 
 let board = createBoard(ROW_COUNT, COLUMN_COUNT);
 
@@ -70,79 +23,112 @@ let board = createBoard(ROW_COUNT, COLUMN_COUNT);
 player = 1;
 
 function createBoard(rows, cols) {
-    return new Array(rows).fill(0).map(() => new Array(cols).fill(0));
+    return Array.from({length: rows}, () => new Array(cols).fill(0));
   };
 
 function resetGame() {
     board = createBoard(ROW_COUNT, COLUMN_COUNT);
-    player = 1;
     drawBoard();
 }
 
-
-function isValidLocation(board, col) {
-    return getColHeight(board, col) != -1;
+function isValidLocation(b, col) {
+    return (b[0][col] == 0);
 }
 
-function getValidLocations(board) {
-    let validLocations = [];
-    for (let i = 0; i < board[0].length; i++) {
-        if (isValidLocation(board, i)) {
-            validLocations.push(i);
+function getValidLocations(b) {
+    locations = [];
+    for (let col = 0; col < COLUMN_COUNT; col++) {
+        // if (col == 0) { console.log("hi: ", board); }
+        if (isValidLocation(b, col)) {
+            locations.push(col);
         }
     }
-    return validLocations;
+    return locations;
 }
 
-function drop_piece(board, col, player) {
-    let y = getColHeight(board, col);
-    board[y][col] = player;
+function drop_piece(b, col, p) {
+    //get the row
+    let row = getColHeight(b, col);
+
+    if (row < 0) {
+        throw new Error("Invalid move: " + col + " " + row);
+    }
+
+    //set the piece
+    b[row][col] = p;
+    //draw the piece
     drawBoard();
-    return board;
+
+    return b;
 }
 
 function getColHeight(board, x) {
-    for (let y = board.length - 1; y >= 0; y--) {
-        if (board[y][x] == 0) {
-            return y;
-        }
-    }
-    return -1;
+    let y;
+    for (y = 5; y >0 && board[y][x]; y--);
+    return y;
 }
 
-function doMove1Player(col) {
-    if (isValidLocation(board, col)) {
-        drop_piece(board, col, player);
-        if(checkWin(board, player)){
-            ctx.fillStyle = "black";
-            ctx.font = "30px Arial";
-            ctx.fillText("Player " + player +" wins!", CIRCLE_SIZE*4 - 100, 24);
-        }
-        player = player == 1 ? 2 : 1;
+function doMove1Player(x) {
+    
+    board = drop_piece(board, x, player);
+
+    if(checkWin(board, player)){
+        ctx.fillStyle = "black";
+        ctx.font = "30px Arial";
+        ctx.fillText("Player " + player +" wins!", CIRCLE_SIZE*4, 30);
+        return;
     }
+
+    player = player == 1 ? 2 : 1;
+    
+  console.log(board);
+  
+  ctx.textAlign = "center";
+  ctx.fillStyle = "black";
+  ctx.font = "30px Arial";
+  ctx.fillText("Thinking..", CIRCLE_SIZE * 4, CIRCLE_SIZE * 6.5 + 30);
+
+  setTimeout(() => {
+
+    let [col, minimax_score] = minimax(board, DEPTH, true);
+
+    board = drop_piece(board, col, player);
+
+
+    if(checkWin(board, player)){
+        ctx.fillStyle = "black";
+        ctx.font = "30px Arial";
+        ctx.fillText("Player " + player +" wins!", CIRCLE_SIZE*4, 30);
+        return;
+    }
+
+    player = player == 1 ? 2 : 1;
+
+  }, 10);
+
+
 }
 
-function doMoveAI() {
-    let bestMove = minimax(board, DEPTH, -Infinity, Infinity, AI_PIECE);
-    drop_piece(board, bestMove[1], player);
-    if(checkWin(board, AI_PIECE)){
+function doMove2Player(x) {
+    
+    let y = getColHeight(board, x);
+
+    if (y < 0) {
+        console.log("Invalid move");
+        return;
+    }
+
+    board[y][x] = player;
+    
+    drawBoard();
+
+    if(checkWin(board, player)){
         ctx.fillStyle = "black";
         ctx.font = "30px Arial";
         ctx.fillText("Player " + player +" wins!", CIRCLE_SIZE*4 - 100, 24);
     }
-    player = player == 1 ? 2 : 1;
-}
 
-function doMovePlayer(col) {
-    if (isValidLocation(board, col)) {
-        drop_piece(board, col, player);
-        if(checkWin(board, player)){
-            ctx.fillStyle = "black";
-            ctx.font = "30px Arial";
-            ctx.fillText("Player " + player +" wins!", CIRCLE_SIZE*4 - 100, 24);
-        }
-        player = player == 1 ? 2 : 1;
-    }
+    player = player == 1 ? 2 : 1;
 }
 
 function drawBoard() {
@@ -236,9 +222,6 @@ function checkWin(board, player){
 
 function minimax(board, depth, maximizingPlayer) {
     let validLocations = getValidLocations(board);
-    // if (depth == 4) {
-    //     console.log(validLocations);
-    // }
     let isTerminal = isTerminalNode(board);
 
     if (isTerminal){
@@ -263,9 +246,6 @@ function minimax(board, depth, maximizingPlayer) {
             // console.log(JSON.stringify(board));
             b_copy = drop_piece(b_copy, c, AI_PIECE);
             new_score = minimax(b_copy, depth - 1, false)[1];
-            if (depth == 4) {
-                console.log(c, new_score);
-            }
             if (new_score > value) {
                 value = new_score;
                 column = c;
@@ -299,8 +279,8 @@ function oncliq(event) {
 
     let col = Math.trunc((x - CIRCLE_SIZE / 2) / CIRCLE_SIZE);
 
-    doMovePlayer(col);
-    doMoveAI();
+    doMove1Player(col);
+    // doMove2Player(col);
 }
 
 
