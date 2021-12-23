@@ -4,7 +4,7 @@ let ctx = canvas.getContext("2d");
 
 const CIRCLE_SIZE = 90;
 
-const DEPTH = 4;
+const DEPTH = 5;
 
 //0 is clear
 //1 is black (human)
