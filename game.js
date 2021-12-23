@@ -6,8 +6,13 @@ const CIRCLE_SIZE = 90;
 
 const DEPTH = 4;
 
+//0 is clear
+//1 is black (human)
+//2 is red (AI)
 const PLAYER_PIECE = 1;
 const AI_PIECE = 2;
+
+player = PLAYER_PIECE;
 
 const ROW_COUNT = 6;
 const COLUMN_COUNT = 7;
@@ -16,11 +21,6 @@ canvas.width = CIRCLE_SIZE*(COLUMN_COUNT+1);
 canvas.height = CIRCLE_SIZE * (ROW_COUNT+1);
 
 let board = createBoard(ROW_COUNT, COLUMN_COUNT);
-
-//0 is clear
-//1 is black 
-//2 is red
-player = 1;
 
 function createBoard(rows, cols) {
     return Array.from({length: rows}, () => new Array(cols).fill(0));
@@ -49,7 +49,7 @@ function getValidLocations(b) {
 function drop_piece(b, col, p) {
     //get the row
     let row = getColHeight(b, col);
-
+  
     if (row < 0) {
         throw new Error("Invalid move: " + col + " " + row);
     }
@@ -64,7 +64,7 @@ function drop_piece(b, col, p) {
 
 function getColHeight(board, x) {
     let y;
-    for (y = 5; y >0 && board[y][x]; y--);
+    for (y = ROW_COUNT-1; y >= 0 && board[y][x]; y--);
     return y;
 }
 
@@ -181,8 +181,14 @@ function positionScore(board, player) {
 function evaluateSquare(corners, player) {
     let score = 0;
     let numPlayer = 0;
-    let numOpposing = 0;
-    oppPlayer = player == 1 ? 2 : 1;
+  let numOpposing = 0;
+  
+  let oppPlayer = player;
+  if (player == PLAYER_PIECE) {
+     oppPlayer = AI_PIECE;
+  } else {
+    oppPlayer = PLAYER_PIECE;
+  }
     for (let i = 0; i < corners.length; i++) {
         if (corners[i] == player) {
             numPlayer++;
@@ -197,7 +203,8 @@ function evaluateSquare(corners, player) {
         score += 5
     } else if (numPlayer == 2 && numOpposing == 0) {
         score += 2
-    } else if (numOpposing == 3 && numPlayer == 0) {
+  }
+  if (numOpposing == 3 && numPlayer == 0) {
         score -= 4
     }
 
@@ -220,14 +227,15 @@ function checkWin(board, player){
 }
 
 
-function minimax(board, depth, maximizingPlayer) {
-    let validLocations = getValidLocations(board);
-    let isTerminal = isTerminalNode(board);
+function minimax(b, depth, maximizingPlayer) {
+  let validLocations = getValidLocations(b);
+  console.log(validLocations);
+    let isTerminal = isTerminalNode(b);
 
     if (isTerminal){
-        if (checkWin(board, AI_PIECE)){
+        if (checkWin(b, AI_PIECE)){
             return [0, 100000000000000];
-        } else if (checkWin(board, PLAYER_PIECE)) {
+        } else if (checkWin(b, PLAYER_PIECE)) {
             return [0, -10000000000000];
         } else {
             return [0, 0];
@@ -235,14 +243,15 @@ function minimax(board, depth, maximizingPlayer) {
     }
 
     if (depth == 0) {
-        return [0, positionScore(board, AI_PIECE)];
+        return [0, positionScore(b, AI_PIECE)];
     }
 
     if (maximizingPlayer) {
-        value = -Infinity;
-        column = validLocations[0];
-        for (c in validLocations) {
-            let b_copy = JSON.parse(JSON.stringify(board));
+      value = -Infinity;
+      column = validLocations[Math.floor(Math.random()*validLocations.length)];
+      for (let i = 0; i < validLocations.length; i++) {
+        c = validLocations[i];
+        let b_copy = JSON.parse(JSON.stringify(b));
             // console.log(JSON.stringify(board));
             b_copy = drop_piece(b_copy, c, AI_PIECE);
             new_score = minimax(b_copy, depth - 1, false)[1];
@@ -252,12 +261,12 @@ function minimax(board, depth, maximizingPlayer) {
             }
         }
         return [column, value]
-    }
-    else {
+    } else {
         value = Infinity;
-        column = validLocations[0];
-        for (c in validLocations) {
-            let b_copy = JSON.parse(JSON.stringify(board));;
+        column = validLocations[Math.floor(Math.random()*validLocations.length)];
+      for (let i = 0; i < validLocations.length; i++) {
+          c = validLocations[i];
+          let b_copy = JSON.parse(JSON.stringify(b));
             b_copy = drop_piece(b_copy, c, PLAYER_PIECE);
             new_score = minimax(b_copy, depth - 1, true)[1];
             if (new_score < value) {
