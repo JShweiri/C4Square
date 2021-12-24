@@ -4,7 +4,7 @@ let ctx = canvas.getContext("2d");
 
 const CIRCLE_SIZE = 90;
 
-const DEPTH = 5;
+var DEPTH = 5;
 
 //0 is clear
 //1 is black (human)
@@ -14,13 +14,27 @@ const AI_PIECE = 2;
 
 player = PLAYER_PIECE;
 
-const ROW_COUNT = 6;
-const COLUMN_COUNT = 7;
+var ROW_COUNT = 6;
+var COLUMN_COUNT = 7;
 
 canvas.width = CIRCLE_SIZE*(COLUMN_COUNT+1);
 canvas.height = CIRCLE_SIZE * (ROW_COUNT+1);
 
 let board = createBoard(ROW_COUNT, COLUMN_COUNT);
+
+function formSub(){
+    DEPTH = parseInt(document.getElementById("depth").value);
+    ROW_COUNT = parseInt(document.getElementById("height").value);
+    COLUMN_COUNT = parseInt(document.getElementById("width").value);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.width = CIRCLE_SIZE*(COLUMN_COUNT+1);
+    canvas.height = CIRCLE_SIZE * (ROW_COUNT + 1);
+    
+    player = PLAYER_PIECE;
+    
+    resetGame();
+}
 
 function min(a, b) {
     return a < b ? a : b;
