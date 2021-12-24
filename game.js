@@ -4,21 +4,15 @@ let ctx = canvas.getContext("2d");
 
 const CIRCLE_SIZE = 90;
 
-var DEPTH = 5;
-
 //0 is clear
 //1 is black (human)
 //2 is red (AI)
 const PLAYER_PIECE = 1;
 const AI_PIECE = 2;
 
-player = PLAYER_PIECE;
-
+var DEPTH = 5;
 var ROW_COUNT = 6;
 var COLUMN_COUNT = 7;
-
-canvas.width = CIRCLE_SIZE*(COLUMN_COUNT+1);
-canvas.height = CIRCLE_SIZE * (ROW_COUNT+1);
 
 let board = createBoard(ROW_COUNT, COLUMN_COUNT);
 
@@ -26,12 +20,6 @@ function formSub(){
     DEPTH = parseInt(document.getElementById("depth").value);
     ROW_COUNT = parseInt(document.getElementById("height").value);
     COLUMN_COUNT = parseInt(document.getElementById("width").value);
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    canvas.width = CIRCLE_SIZE*(COLUMN_COUNT+1);
-    canvas.height = CIRCLE_SIZE * (ROW_COUNT + 1);
-    
-    player = PLAYER_PIECE;
     
     resetGame();
 }
@@ -45,6 +33,10 @@ function createBoard(rows, cols) {
   };
 
 function resetGame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.width = CIRCLE_SIZE*(COLUMN_COUNT+1);
+    canvas.height = CIRCLE_SIZE * (ROW_COUNT + 1);
+    player = PLAYER_PIECE;
     board = createBoard(ROW_COUNT, COLUMN_COUNT);
     drawBoard();
 }
@@ -304,8 +296,6 @@ function oncliq(event) {
     // doMove2Player(col);
 }
 
-
+resetGame();
 // Add event listener for `click` events.
 canvas.addEventListener('click', oncliq, false);
-
-drawBoard();
