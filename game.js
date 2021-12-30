@@ -227,23 +227,6 @@ function doMove1Player(x) {
 
 }
 
-function doMove2Player(x) {
-
-    let y = getColHeight(board, x);
-
-    board[y][x] = player;
-
-    drawBoard();
-
-    if (checkWin(board, player)) {
-        ctx.fillStyle = "black";
-        ctx.font = "30px Arial";
-        ctx.fillText("Player " + player + " wins!", CIRCLE_SIZE * 4 - 100, 24);
-    }
-
-    player = player == 1 ? 2 : 1;
-}
-
 function drawBoard() {
     ctx.fillStyle = "lightblue";
     ctx.rect(0, 0, CIRCLE_SIZE * (COLUMN_COUNT + 1), CIRCLE_SIZE * (ROW_COUNT + 1));
