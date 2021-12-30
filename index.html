@@ -8,20 +8,46 @@
 
     <br>
 
-    <input type="radio" id="0P" name="numPlayers" value="0">
+    <input type="radio" id="0P" name="numPlayers" onclick="radioClicked(0)" value="0">
     <label for="0P">0 Players</label>
-    <input type="radio" id="1P" name="numPlayers" value="1">
+    <input type="radio" id="1P" name="numPlayers" onclick="radioClicked(1)" value="1">
     <label for="1P">1 Player</label>
-    <input type="radio" id="2P" name="numPlayers" value="2">
+    <input type="radio" id="2P" name="numPlayers" onclick="radioClicked(2)" value="2">
     <label for="2P">2 Players</label>
+    <br>
+    <div id="P1MM">
+    <label for="P1miniMax">P1 Use MiniMax (uses MCTS otherwise)</label>
+    <input type="checkbox" id="P1miniMax" onclick="setDepthVisibility()" checked="true">
+</div>
+<div id="P2MM">
+    <label for="P2miniMax">P2 Use MiniMax (uses MCTS otherwise)</label>
+    <input type="checkbox" id="P2miniMax" onclick="setDepthVisibility()" checked="true">
+    </div>
     <br>
     <label for="width">Width:</label>
     <input type="text" id="width" value="7">
     <label for="width">Height:</label>
     <input type="text" id="height" value="6">
-    <label for="width">Depth:</label>
-    <input type="text" id="depth" value="5">
 
+    <div id="P1depthbox" style="display: inline;">
+    <label for="P1depth">P1 Depth:</label>
+    <input type="text" id="P1depth" value="5">
+    </div>
+
+    <div id="P1Nbox" style="display: none;">
+        <label for="P1n">P1 N:</label>
+        <input type="text" id="P1n" value="5000">
+        </div>
+
+        <div id="P2depthbox" style="display: inline;">
+            <label for="P2depth">P2 Depth:</label>
+            <input type="text" id="P2depth" value="5">
+            </div>
+        
+            <div id="P2Nbox" style="display: none;">
+                <label for="P2n">P2 N:</label>
+                <input type="text" id="P2n" value="5000">
+                </div>
 
     <input type="button" id="submitt" value="submit" onclick="formSub()">
 

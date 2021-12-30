@@ -10,16 +10,83 @@ const CIRCLE_SIZE = 90;
 const PLAYER_PIECE = 1;
 const AI_PIECE = 2;
 
-var DEPTH = 5;
+var P1DEPTH = 5;
+var P2DEPTH = 5;
+
 var ROW_COUNT = 6;
 var COLUMN_COUNT = 7;
 
+var numPlayers = 1;
+
+var player1UseMiniMax = true;
+var player2UseMiniMax = true;
+var P1N = 5000;
+var P2N = 5000;
+
 let board = createBoard(ROW_COUNT, COLUMN_COUNT);
 
+function radioClicked(n) {
+    numPlayers = n;
+    setHTMLVisibility();
+}
+
+function setHTMLVisibility() {
+    if (numPlayers == 0) {
+        document.getElementById("P1MM").style.display = "inline";
+        document.getElementById("P2MM").style.display = "inline";
+
+        if (player1UseMiniMax) {
+            document.getElementById("P1depthbox").style.display = "inline";
+            document.getElementById("P1Nbox").style.display = "none";
+        } else {
+            document.getElementById("P1depthbox").style.display = "none";
+            document.getElementById("P1Nbox").style.display = "inline";
+        }
+
+        if (player2UseMiniMax) {
+            document.getElementById("P2depthbox").style.display = "inline";
+            document.getElementById("P2Nbox").style.display = "none";
+        } else {
+            document.getElementById("P2depthbox").style.display = "none";
+            document.getElementById("P2Nbox").style.display = "inline";
+        }
+
+    } else if (numPlayers == 1) {
+        document.getElementById("P1MM").style.display = "none";
+        document.getElementById("P2MM").style.display = "inline";
+        document.getElementById("P1depthbox").style.display = "none";
+        document.getElementById("P1Nbox").style.display = "none";
+        
+        if (player2UseMiniMax) {
+            document.getElementById("P2depthbox").style.display = "inline";
+            document.getElementById("P2Nbox").style.display = "none";
+        } else {
+            document.getElementById("P2depthbox").style.display = "none";
+            document.getElementById("P2Nbox").style.display = "inline";
+        }
+    } else {
+        document.getElementById("P1MM").style.display = "none";
+        document.getElementById("P2MM").style.display = "none";
+        document.getElementById("P1depthbox").style.display = "none";
+        document.getElementById("P2depthbox").style.display = "none";
+        document.getElementById("P1Nbox").style.display = "none";
+        document.getElementById("P2Nbox").style.display = "none";
+    }
+}
+
+function setDepthVisibility() {
+    player1UseMiniMax = document.getElementById("P1miniMax").checked;
+    player2UseMiniMax = document.getElementById("P2miniMax").checked;
+    setHTMLVisibility();
+}
+
 function formSub(){
-    DEPTH = parseInt(document.getElementById("depth").value);
     ROW_COUNT = parseInt(document.getElementById("height").value);
     COLUMN_COUNT = parseInt(document.getElementById("width").value);
+    P1N = parseInt(document.getElementById("P1n").value);
+    P1DEPTH = parseInt(document.getElementById("P1depth").value);
+    P2N = parseInt(document.getElementById("P1n").value);
+    P2DEPTH = parseInt(document.getElementById("P1depth").value);
     
     resetGame();
 }
@@ -55,6 +122,19 @@ function getValidLocations(b) {
     return locations;
 }
 
+function makeMove(b, col, p) {
+    let row = getColHeight(b, col);
+  
+    if (row < 0) {
+        throw new Error("Invalid move: " + col + " " + row);
+    }
+
+    //set the piece
+    b[row][col] = p;
+
+    return b;
+}
+
 function drop_piece(b, col, p) {
     //get the row
     let row = getColHeight(b, col);
@@ -79,7 +159,22 @@ function getColHeight(board, x) {
 
 function doMove1Player(x) {
     
-    board = drop_piece(board, x, player);
+    if (numPlayers >= 1) {
+        board = drop_piece(board, x, player);
+    } else {
+        if (player1UseMiniMax) {
+            let [col, minimax_score] = minimax(board, P1DEPTH, true);
+            console.log(col + " " + minimax_score);
+            board = drop_piece(board, col, player);
+            
+        } else {
+            let col = MCBestMove(board, player, P1N);
+            
+            console.log(col);
+      
+            board = drop_piece(board, col, player);
+        }
+    }
 
     if(checkWin(board, player)){
         ctx.fillStyle = "black";
@@ -97,14 +192,26 @@ function doMove1Player(x) {
   ctx.font = "30px Arial";
   ctx.fillText("Thinking..", CIRCLE_SIZE * (COLUMN_COUNT+1)/2, CIRCLE_SIZE * (ROW_COUNT+0.5) + 30);
 
-  setTimeout(() => {
+    setTimeout(() => {
+      
 
-    let [col, minimax_score] = minimax(board, DEPTH, true);
 
-    console.log(col + " " + minimax_score);
-
-    board = drop_piece(board, col, player);
-
+        if (numPlayers == 2) {
+            board = drop_piece(board, x, player);
+        } else {
+            if (player2UseMiniMax) {
+                let [col, minimax_score] = minimax(board, P2DEPTH, true);
+                console.log(col + " " + minimax_score);
+                board = drop_piece(board, col, player);
+                
+            } else {
+                let col = MCBestMove(board, player, P2N);
+                
+                console.log(col);
+          
+                board = drop_piece(board, col, player);
+            }
+        }
 
     if(checkWin(board, player)){
         ctx.fillStyle = "black";
@@ -217,6 +324,17 @@ function evaluateSquare(corners, player) {
 return score
 }
 
+function checkDraw(board) {
+    for (let x = 0; x < COLUMN_COUNT; x++) {
+        for (let y = 0; y < ROW_COUNT; y++) {
+            if (board[y][x] == 0) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 function checkWin(board, player){
     for (let x = 0; x < COLUMN_COUNT; x++) {
         for (let y = 0; y < ROW_COUNT; y++) {
@@ -231,6 +349,79 @@ function checkWin(board, player){
     }
     return false;
 }
+
+
+
+
+
+
+
+
+
+function playoutValue(board, currentPlayer) {
+    let opposingPlayer = currentPlayer == PLAYER_PIECE ? AI_PIECE : PLAYER_PIECE;
+    
+    //other player just went, check if they won or drew
+    if (checkWin(board, opposingPlayer)) {
+        return -1;
+    }
+    if (checkDraw(board)) {
+        return 0;
+    }
+        
+    let validLocations = getValidLocations(board);
+
+    let col = validLocations[Math.floor(Math.random() * validLocations.length)];
+
+    let boardcopy = JSON.parse(JSON.stringify(board));
+    boardcopy = makeMove(boardcopy, col, currentPlayer);
+
+    value = -playoutValue(boardcopy, opposingPlayer);
+	
+    return value
+}
+
+function monteCarloValue(board, currentPlayer, N) {
+    scores = [];
+    for (let i = 0; i < N; i++) {
+        scores.push(playoutValue(board, currentPlayer));
+    }
+    return scores.reduce((a, b) => a + b) / N;
+}
+
+function MCBestMove(board, currentPlayer, N) {
+    let validLocations = getValidLocations(board);
+    let opposingPlayer = currentPlayer == PLAYER_PIECE ? AI_PIECE : PLAYER_PIECE;
+
+	
+    action_dict = {}
+    for (let i = 0; i < validLocations.length; i++) {
+        let col = validLocations[i];
+        let boardcopy = JSON.parse(JSON.stringify(board));
+        boardcopy = makeMove(boardcopy, col, currentPlayer);
+        action_dict[validLocations[i]] = -monteCarloValue(boardcopy, opposingPlayer, N);
+    }
+
+    console.log(action_dict);
+
+    mm = -Infinity;
+    mv = [];
+    for (const [key, value] of Object.entries(action_dict)) {
+        if (value > mm) {
+            mm = value;
+            mv = key;
+        }
+    }
+    return mv;
+}
+
+
+
+
+
+
+
+
 
 
 function minimax(b, depth, maximizingPlayer) {
@@ -293,7 +484,6 @@ function oncliq(event) {
     let col = Math.trunc((x - CIRCLE_SIZE / 2) / CIRCLE_SIZE);
 
     doMove1Player(col);
-    // doMove2Player(col);
 }
 
 resetGame();
