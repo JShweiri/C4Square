@@ -7,8 +7,8 @@ const CIRCLE_SIZE = 90;
 //0 is clear
 //1 is black (human)
 //2 is red (AI)
-const PLAYER_PIECE = 1;
-const AI_PIECE = 2;
+const BLACK_PIECE = 1;
+const RED_PIECE = 2;
 
 var P1DEPTH = 5;
 var P2DEPTH = 5;
@@ -102,7 +102,7 @@ function resetGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     canvas.width = CIRCLE_SIZE * (COLUMN_COUNT + 1);
     canvas.height = CIRCLE_SIZE * (ROW_COUNT + 1);
-    player = PLAYER_PIECE;
+    player = BLACK_PIECE;
     board = createBoard(ROW_COUNT, COLUMN_COUNT);
     drawBoard();
 }
@@ -275,7 +275,7 @@ function drawBoard() {
 }
 
 function isTerminalNode(board) {
-    return checkWin(board, PLAYER_PIECE) || checkWin(board, AI_PIECE) || getValidLocations(board).length == 0;
+    return checkWin(board, BLACK_PIECE) || checkWin(board, RED_PIECE) || getValidLocations(board).length == 0;
 }
 
 function positionScore(board, player) {
@@ -298,10 +298,10 @@ function evaluateSquare(corners, player) {
     let numOpposing = 0;
 
     let oppPlayer = player;
-    if (player == PLAYER_PIECE) {
-        oppPlayer = AI_PIECE;
+    if (player == BLACK_PIECE) {
+        oppPlayer = RED_PIECE;
     } else {
-        oppPlayer = PLAYER_PIECE;
+        oppPlayer = BLACK_PIECE;
     }
     for (let i = 0; i < corners.length; i++) {
         if (corners[i] == player) {
@@ -360,7 +360,7 @@ function checkWin(board, player) {
 
 
 function playoutValue(board, currentPlayer) {
-    let opposingPlayer = currentPlayer == PLAYER_PIECE ? AI_PIECE : PLAYER_PIECE;
+    let opposingPlayer = currentPlayer == BLACK_PIECE ? RED_PIECE : BLACK_PIECE;
 
     //other player just went, check if they won or drew
     if (checkWin(board, opposingPlayer)) {
@@ -393,7 +393,7 @@ function monteCarloValue(board, currentPlayer, N) {
 
 function MCBestMove(board, currentPlayer, N) {
     let validLocations = getValidLocations(board);
-    let opposingPlayer = currentPlayer == PLAYER_PIECE ? AI_PIECE : PLAYER_PIECE;
+    let opposingPlayer = currentPlayer == BLACK_PIECE ? RED_PIECE : BLACK_PIECE;
 
 
     action_dict = {}
@@ -431,9 +431,9 @@ function minimax(b, depth, maximizingPlayer) {
     let isTerminal = isTerminalNode(b);
 
     if (isTerminal) {
-        if (checkWin(b, AI_PIECE)) {
+        if (checkWin(b, RED_PIECE)) {
             return [0, 100000000000000];
-        } else if (checkWin(b, PLAYER_PIECE)) {
+        } else if (checkWin(b, BLACK_PIECE)) {
             return [0, -10000000000000];
         } else {
             return [0, 0];
@@ -441,7 +441,7 @@ function minimax(b, depth, maximizingPlayer) {
     }
 
     if (depth == 0) {
-        return [0, positionScore(b, AI_PIECE)];
+        return [0, positionScore(b, RED_PIECE)];
     }
 
     if (maximizingPlayer) {
@@ -449,7 +449,7 @@ function minimax(b, depth, maximizingPlayer) {
         let column = validLocations[Math.floor(Math.random() * validLocations.length)];
         for (let i = 0; i < validLocations.length; i++) {
             let c = validLocations[i];
-            board = makeMove(board, c, AI_PIECE);
+            board = makeMove(board, c, RED_PIECE);
             let new_score = minimax(board, depth - 1, false)[1];
             board = undoMove(board, c);
             if (new_score > value) {
@@ -463,7 +463,7 @@ function minimax(b, depth, maximizingPlayer) {
         let column = validLocations[Math.floor(Math.random() * validLocations.length)];
         for (let i = 0; i < validLocations.length; i++) {
             let c = validLocations[i];
-            board = makeMove(board, c, PLAYER_PIECE);
+            board = makeMove(board, c, BLACK_PIECE);
             let new_score = minimax(board, depth - 1, true)[1];
             board = undoMove(board, c);
             if (new_score < value) {
