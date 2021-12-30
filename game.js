@@ -86,7 +86,7 @@ function formSub() {
     P1N = parseInt(document.getElementById("P1n").value);
     P1DEPTH = parseInt(document.getElementById("P1depth").value);
     P2N = parseInt(document.getElementById("P2n").value);
-    P2DEPTH = parseInt(document.getElementById("P1depth").value);
+    P2DEPTH = parseInt(document.getElementById("P2depth").value);
 
     resetGame();
 }
@@ -131,6 +131,19 @@ function makeMove(b, col, p) {
 
     //set the piece
     b[row][col] = p;
+
+    return b;
+}
+
+function undoMove(b, col) {
+    let row = getColHeight(b, col) + 1;
+
+    if (row < 0 || row >= ROW_COUNT) {
+        return;
+    }
+
+    //set the piece
+    b[row][col] = 0;
 
     return b;
 }
@@ -185,7 +198,7 @@ function doMove1Player(x) {
 
     player = player == 1 ? 2 : 1;
 
-    console.log(board);
+    // console.log(board);
 
     ctx.textAlign = "center";
     ctx.fillStyle = "black";
@@ -356,10 +369,11 @@ function playoutValue(board, currentPlayer) {
 
     let col = validLocations[Math.floor(Math.random() * validLocations.length)];
 
-    let boardcopy = JSON.parse(JSON.stringify(board));
-    boardcopy = makeMove(boardcopy, col, currentPlayer);
+    board = makeMove(board, col, currentPlayer);
 
-    value = -playoutValue(boardcopy, opposingPlayer);
+    value = -playoutValue(board, opposingPlayer);
+
+    board = undoMove(board, col);
 
     return value
 }
@@ -380,9 +394,9 @@ function MCBestMove(board, currentPlayer, N) {
     action_dict = {}
     for (let i = 0; i < validLocations.length; i++) {
         let col = validLocations[i];
-        let boardcopy = JSON.parse(JSON.stringify(board));
-        boardcopy = makeMove(boardcopy, col, currentPlayer);
-        action_dict[validLocations[i]] = -monteCarloValue(boardcopy, opposingPlayer, N);
+        board = makeMove(board, col, currentPlayer);
+        action_dict[validLocations[i]] = -monteCarloValue(board, opposingPlayer, N);
+        board = undoMove(board, col);
     }
 
     console.log(action_dict);
@@ -430,9 +444,9 @@ function minimax(b, depth, maximizingPlayer) {
         let column = validLocations[Math.floor(Math.random() * validLocations.length)];
         for (let i = 0; i < validLocations.length; i++) {
             let c = validLocations[i];
-            let b_copy = JSON.parse(JSON.stringify(b));
-            b_copy = drop_piece(b_copy, c, AI_PIECE);
-            let new_score = minimax(b_copy, depth - 1, false)[1];
+            board = makeMove(board, c, AI_PIECE);
+            let new_score = minimax(board, depth - 1, false)[1];
+            board = undoMove(board, c);
             if (new_score > value) {
                 value = new_score;
                 column = c;
@@ -444,9 +458,9 @@ function minimax(b, depth, maximizingPlayer) {
         let column = validLocations[Math.floor(Math.random() * validLocations.length)];
         for (let i = 0; i < validLocations.length; i++) {
             let c = validLocations[i];
-            let b_copy = JSON.parse(JSON.stringify(b));
-            b_copy = drop_piece(b_copy, c, PLAYER_PIECE);
-            let new_score = minimax(b_copy, depth - 1, true)[1];
+            board = makeMove(board, c, PLAYER_PIECE);
+            let new_score = minimax(board, depth - 1, true)[1];
+            board = undoMove(board, c);
             if (new_score < value) {
                 value = new_score;
                 column = c;
