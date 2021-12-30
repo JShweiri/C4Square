@@ -56,7 +56,7 @@ function setHTMLVisibility() {
         document.getElementById("P2MM").style.display = "inline";
         document.getElementById("P1depthbox").style.display = "none";
         document.getElementById("P1Nbox").style.display = "none";
-        
+
         if (player2UseMiniMax) {
             document.getElementById("P2depthbox").style.display = "inline";
             document.getElementById("P2Nbox").style.display = "none";
@@ -80,14 +80,14 @@ function setDepthVisibility() {
     setHTMLVisibility();
 }
 
-function formSub(){
+function formSub() {
     ROW_COUNT = parseInt(document.getElementById("height").value);
     COLUMN_COUNT = parseInt(document.getElementById("width").value);
     P1N = parseInt(document.getElementById("P1n").value);
     P1DEPTH = parseInt(document.getElementById("P1depth").value);
-    P2N = parseInt(document.getElementById("P1n").value);
+    P2N = parseInt(document.getElementById("P2n").value);
     P2DEPTH = parseInt(document.getElementById("P1depth").value);
-    
+
     resetGame();
 }
 
@@ -96,12 +96,12 @@ function min(a, b) {
 }
 
 function createBoard(rows, cols) {
-    return Array.from({length: rows}, () => new Array(cols).fill(0));
-  };
+    return Array.from({ length: rows }, () => new Array(cols).fill(0));
+};
 
 function resetGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    canvas.width = CIRCLE_SIZE*(COLUMN_COUNT+1);
+    canvas.width = CIRCLE_SIZE * (COLUMN_COUNT + 1);
     canvas.height = CIRCLE_SIZE * (ROW_COUNT + 1);
     player = PLAYER_PIECE;
     board = createBoard(ROW_COUNT, COLUMN_COUNT);
@@ -124,7 +124,7 @@ function getValidLocations(b) {
 
 function makeMove(b, col, p) {
     let row = getColHeight(b, col);
-  
+
     if (row < 0) {
         throw new Error("Invalid move: " + col + " " + row);
     }
@@ -138,7 +138,7 @@ function makeMove(b, col, p) {
 function drop_piece(b, col, p) {
     //get the row
     let row = getColHeight(b, col);
-  
+
     if (row < 0) {
         throw new Error("Invalid move: " + col + " " + row);
     }
@@ -153,47 +153,47 @@ function drop_piece(b, col, p) {
 
 function getColHeight(board, x) {
     let y;
-    for (y = ROW_COUNT-1; y >= 0 && board[y][x]; y--);
+    for (y = ROW_COUNT - 1; y >= 0 && board[y][x]; y--);
     return y;
 }
 
 function doMove1Player(x) {
-    
+
     if (numPlayers >= 1) {
         board = drop_piece(board, x, player);
     } else {
         if (player1UseMiniMax) {
-            let [col, minimax_score] = minimax(board, P1DEPTH, true);
+            let [col, minimax_score] = minimax(board, P1DEPTH, false);
             console.log(col + " " + minimax_score);
             board = drop_piece(board, col, player);
-            
+
         } else {
             let col = MCBestMove(board, player, P1N);
-            
+
             console.log(col);
-      
+
             board = drop_piece(board, col, player);
         }
     }
 
-    if(checkWin(board, player)){
+    if (checkWin(board, player)) {
         ctx.fillStyle = "black";
         ctx.font = "30px Arial";
-        ctx.fillText("Player " + player +" wins!", CIRCLE_SIZE * (COLUMN_COUNT+1)/2, 30);
+        ctx.fillText("Player " + player + " wins!", CIRCLE_SIZE * (COLUMN_COUNT + 1) / 2, 30);
         return;
     }
 
     player = player == 1 ? 2 : 1;
-    
-  console.log(board);
-  
-  ctx.textAlign = "center";
-  ctx.fillStyle = "black";
-  ctx.font = "30px Arial";
-  ctx.fillText("Thinking..", CIRCLE_SIZE * (COLUMN_COUNT+1)/2, CIRCLE_SIZE * (ROW_COUNT+0.5) + 30);
+
+    console.log(board);
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "black";
+    ctx.font = "30px Arial";
+    ctx.fillText("Thinking..", CIRCLE_SIZE * (COLUMN_COUNT + 1) / 2, CIRCLE_SIZE * (ROW_COUNT + 0.5) + 30);
 
     setTimeout(() => {
-      
+
 
 
         if (numPlayers == 2) {
@@ -203,42 +203,42 @@ function doMove1Player(x) {
                 let [col, minimax_score] = minimax(board, P2DEPTH, true);
                 console.log(col + " " + minimax_score);
                 board = drop_piece(board, col, player);
-                
+
             } else {
                 let col = MCBestMove(board, player, P2N);
-                
+
                 console.log(col);
-          
+
                 board = drop_piece(board, col, player);
             }
         }
 
-    if(checkWin(board, player)){
-        ctx.fillStyle = "black";
-        ctx.font = "30px Arial";
-        ctx.fillText("Player " + player +" wins!", CIRCLE_SIZE * (COLUMN_COUNT+1)/2, 30);
-        return;
-    }
+        if (checkWin(board, player)) {
+            ctx.fillStyle = "black";
+            ctx.font = "30px Arial";
+            ctx.fillText("Player " + player + " wins!", CIRCLE_SIZE * (COLUMN_COUNT + 1) / 2, 30);
+            return;
+        }
 
-    player = player == 1 ? 2 : 1;
+        player = player == 1 ? 2 : 1;
 
-  }, 10);
+    }, 10);
 
 
 }
 
 function doMove2Player(x) {
-    
+
     let y = getColHeight(board, x);
 
     board[y][x] = player;
-    
+
     drawBoard();
 
-    if(checkWin(board, player)){
+    if (checkWin(board, player)) {
         ctx.fillStyle = "black";
         ctx.font = "30px Arial";
-        ctx.fillText("Player " + player +" wins!", CIRCLE_SIZE*4 - 100, 24);
+        ctx.fillText("Player " + player + " wins!", CIRCLE_SIZE * 4 - 100, 24);
     }
 
     player = player == 1 ? 2 : 1;
@@ -246,34 +246,34 @@ function doMove2Player(x) {
 
 function drawBoard() {
     ctx.fillStyle = "lightblue";
-    ctx.rect(0, 0, CIRCLE_SIZE*(COLUMN_COUNT+1), CIRCLE_SIZE*(ROW_COUNT+1));
+    ctx.rect(0, 0, CIRCLE_SIZE * (COLUMN_COUNT + 1), CIRCLE_SIZE * (ROW_COUNT + 1));
     ctx.fill();
-    for(let i = 0; i < board.length; i++){
-        for(let j = 0; j < board[0].length; j++){
-           
-            ctx.beginPath();
-            ctx.arc((j+1)*CIRCLE_SIZE, (i+1)*CIRCLE_SIZE, CIRCLE_SIZE/2, 0, 2 * Math.PI);
+    for (let i = 0; i < board.length; i++) {
+        for (let j = 0; j < board[0].length; j++) {
 
-            if(board[i][j] == 0){
+            ctx.beginPath();
+            ctx.arc((j + 1) * CIRCLE_SIZE, (i + 1) * CIRCLE_SIZE, CIRCLE_SIZE / 2, 0, 2 * Math.PI);
+
+            if (board[i][j] == 0) {
                 ctx.fillStyle = "gray";
             }
-            
-            if(board[i][j] == 1){
+
+            if (board[i][j] == 1) {
                 ctx.fillStyle = "black";
             }
 
-            if(board[i][j] == 2){
+            if (board[i][j] == 2) {
                 ctx.fillStyle = "red";
             }
 
             ctx.fill();
-            
+
         }
     }
 
 }
 
-function isTerminalNode(board){
+function isTerminalNode(board) {
     return checkWin(board, PLAYER_PIECE) || checkWin(board, AI_PIECE) || getValidLocations(board).length == 0;
 }
 
@@ -294,14 +294,14 @@ function positionScore(board, player) {
 function evaluateSquare(corners, player) {
     let score = 0;
     let numPlayer = 0;
-  let numOpposing = 0;
-  
-  let oppPlayer = player;
-  if (player == PLAYER_PIECE) {
-     oppPlayer = AI_PIECE;
-  } else {
-    oppPlayer = PLAYER_PIECE;
-  }
+    let numOpposing = 0;
+
+    let oppPlayer = player;
+    if (player == PLAYER_PIECE) {
+        oppPlayer = AI_PIECE;
+    } else {
+        oppPlayer = PLAYER_PIECE;
+    }
     for (let i = 0; i < corners.length; i++) {
         if (corners[i] == player) {
             numPlayer++;
@@ -316,12 +316,12 @@ function evaluateSquare(corners, player) {
         score += 5
     } else if (numPlayer == 2 && numOpposing == 0) {
         score += 2
-  }
-  if (numOpposing == 3 && numPlayer == 0) {
+    }
+    if (numOpposing == 3 && numPlayer == 0) {
         score -= 4
     }
 
-return score
+    return score
 }
 
 function checkDraw(board) {
@@ -335,7 +335,7 @@ function checkDraw(board) {
     return true;
 }
 
-function checkWin(board, player){
+function checkWin(board, player) {
     for (let x = 0; x < COLUMN_COUNT; x++) {
         for (let y = 0; y < ROW_COUNT; y++) {
             for (let n = 1; n < min(COLUMN_COUNT, ROW_COUNT); n++) {
@@ -360,7 +360,7 @@ function checkWin(board, player){
 
 function playoutValue(board, currentPlayer) {
     let opposingPlayer = currentPlayer == PLAYER_PIECE ? AI_PIECE : PLAYER_PIECE;
-    
+
     //other player just went, check if they won or drew
     if (checkWin(board, opposingPlayer)) {
         return -1;
@@ -368,7 +368,7 @@ function playoutValue(board, currentPlayer) {
     if (checkDraw(board)) {
         return 0;
     }
-        
+
     let validLocations = getValidLocations(board);
 
     let col = validLocations[Math.floor(Math.random() * validLocations.length)];
@@ -377,7 +377,7 @@ function playoutValue(board, currentPlayer) {
     boardcopy = makeMove(boardcopy, col, currentPlayer);
 
     value = -playoutValue(boardcopy, opposingPlayer);
-	
+
     return value
 }
 
@@ -393,7 +393,7 @@ function MCBestMove(board, currentPlayer, N) {
     let validLocations = getValidLocations(board);
     let opposingPlayer = currentPlayer == PLAYER_PIECE ? AI_PIECE : PLAYER_PIECE;
 
-	
+
     action_dict = {}
     for (let i = 0; i < validLocations.length; i++) {
         let col = validLocations[i];
@@ -425,11 +425,11 @@ function MCBestMove(board, currentPlayer, N) {
 
 
 function minimax(b, depth, maximizingPlayer) {
-  let validLocations = getValidLocations(b);
+    let validLocations = getValidLocations(b);
     let isTerminal = isTerminalNode(b);
 
-    if (isTerminal){
-        if (checkWin(b, AI_PIECE)){
+    if (isTerminal) {
+        if (checkWin(b, AI_PIECE)) {
             return [0, 100000000000000];
         } else if (checkWin(b, PLAYER_PIECE)) {
             return [0, -10000000000000];
@@ -443,13 +443,13 @@ function minimax(b, depth, maximizingPlayer) {
     }
 
     if (maximizingPlayer) {
-      let value = -Infinity;
-      let column = validLocations[Math.floor(Math.random() * validLocations.length)];
-      for (let i = 0; i < validLocations.length; i++) {
-        let c = validLocations[i];
-        let b_copy = JSON.parse(JSON.stringify(b));
+        let value = -Infinity;
+        let column = validLocations[Math.floor(Math.random() * validLocations.length)];
+        for (let i = 0; i < validLocations.length; i++) {
+            let c = validLocations[i];
+            let b_copy = JSON.parse(JSON.stringify(b));
             b_copy = drop_piece(b_copy, c, AI_PIECE);
-        let new_score = minimax(b_copy, depth - 1, false)[1];
+            let new_score = minimax(b_copy, depth - 1, false)[1];
             if (new_score > value) {
                 value = new_score;
                 column = c;
@@ -458,10 +458,10 @@ function minimax(b, depth, maximizingPlayer) {
         return [column, value]
     } else {
         let value = Infinity;
-        let column = validLocations[Math.floor(Math.random()*validLocations.length)];
-      for (let i = 0; i < validLocations.length; i++) {
-          let c = validLocations[i];
-          let b_copy = JSON.parse(JSON.stringify(b));
+        let column = validLocations[Math.floor(Math.random() * validLocations.length)];
+        for (let i = 0; i < validLocations.length; i++) {
+            let c = validLocations[i];
+            let b_copy = JSON.parse(JSON.stringify(b));
             b_copy = drop_piece(b_copy, c, PLAYER_PIECE);
             let new_score = minimax(b_copy, depth - 1, true)[1];
             if (new_score < value) {
