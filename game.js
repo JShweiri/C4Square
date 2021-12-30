@@ -16,7 +16,8 @@ var P2DEPTH = 5;
 var ROW_COUNT = 6;
 var COLUMN_COUNT = 7;
 
-var numPlayers = 1;
+var P1Human = true;
+var P2Human = false;
 
 var player1UseMiniMax = true;
 var player2UseMiniMax = true;
@@ -31,9 +32,8 @@ function radioClicked(n) {
 }
 
 function setHTMLVisibility() {
-    if (numPlayers == 0) {
+    if (P1Human == false) {
         document.getElementById("P1MM").style.display = "inline";
-        document.getElementById("P2MM").style.display = "inline";
 
         if (player1UseMiniMax) {
             document.getElementById("P1depthbox").style.display = "inline";
@@ -43,35 +43,34 @@ function setHTMLVisibility() {
             document.getElementById("P1Nbox").style.display = "inline";
         }
 
-        if (player2UseMiniMax) {
-            document.getElementById("P2depthbox").style.display = "inline";
-            document.getElementById("P2Nbox").style.display = "none";
-        } else {
-            document.getElementById("P2depthbox").style.display = "none";
-            document.getElementById("P2Nbox").style.display = "inline";
-        }
-
-    } else if (numPlayers == 1) {
-        document.getElementById("P1MM").style.display = "none";
-        document.getElementById("P2MM").style.display = "inline";
-        document.getElementById("P1depthbox").style.display = "none";
-        document.getElementById("P1Nbox").style.display = "none";
-
-        if (player2UseMiniMax) {
-            document.getElementById("P2depthbox").style.display = "inline";
-            document.getElementById("P2Nbox").style.display = "none";
-        } else {
-            document.getElementById("P2depthbox").style.display = "none";
-            document.getElementById("P2Nbox").style.display = "inline";
-        }
     } else {
         document.getElementById("P1MM").style.display = "none";
-        document.getElementById("P2MM").style.display = "none";
         document.getElementById("P1depthbox").style.display = "none";
-        document.getElementById("P2depthbox").style.display = "none";
         document.getElementById("P1Nbox").style.display = "none";
+
+    }
+    if (P2Human == false) {
+        document.getElementById("P2MM").style.display = "inline";
+
+        if (player2UseMiniMax) {
+            document.getElementById("P2depthbox").style.display = "inline";
+            document.getElementById("P2Nbox").style.display = "none";
+        } else {
+            document.getElementById("P2depthbox").style.display = "none";
+            document.getElementById("P2Nbox").style.display = "inline";
+        }
+
+    } else {
+        document.getElementById("P2MM").style.display = "none";
+        document.getElementById("P2depthbox").style.display = "none";
         document.getElementById("P2Nbox").style.display = "none";
     }
+}
+
+function setHuman() {
+    P1Human = document.getElementById("P1human").checked;
+    P2Human = document.getElementById("P2human").checked;
+    setHTMLVisibility();
 }
 
 function setDepthVisibility() {
@@ -172,9 +171,15 @@ function getColHeight(board, x) {
 
 function doMove1Player(x) {
 
-    if (numPlayers >= 1) {
+    if (P1Human) {
         board = drop_piece(board, x, player);
     } else {
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "black";
+        ctx.font = "30px Arial";
+        ctx.fillText("Thinking..", CIRCLE_SIZE * (COLUMN_COUNT + 1) / 2, CIRCLE_SIZE * (ROW_COUNT + 0.5) + 30);
+
         if (player1UseMiniMax) {
             let [col, minimax_score] = minimax(board, P1DEPTH, false);
             console.log(col + " " + minimax_score);
@@ -200,18 +205,18 @@ function doMove1Player(x) {
 
     // console.log(board);
 
-    ctx.textAlign = "center";
-    ctx.fillStyle = "black";
-    ctx.font = "30px Arial";
-    ctx.fillText("Thinking..", CIRCLE_SIZE * (COLUMN_COUNT + 1) / 2, CIRCLE_SIZE * (ROW_COUNT + 0.5) + 30);
-
     setTimeout(() => {
 
 
 
-        if (numPlayers == 2) {
+        if (P2Human) {
             board = drop_piece(board, x, player);
         } else {
+            ctx.textAlign = "center";
+            ctx.fillStyle = "black";
+            ctx.font = "30px Arial";
+            ctx.fillText("Thinking..", CIRCLE_SIZE * (COLUMN_COUNT + 1) / 2, CIRCLE_SIZE * (ROW_COUNT + 0.5) + 30);
+
             if (player2UseMiniMax) {
                 let [col, minimax_score] = minimax(board, P2DEPTH, true);
                 console.log(col + " " + minimax_score);

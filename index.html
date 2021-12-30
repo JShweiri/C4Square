@@ -10,22 +10,26 @@
 
     <br>
 
-    <input type="radio" id="0P" name="numPlayers" onclick="radioClicked(0)" value="0">
-    <label for="0P">0 Players</label>
-    <input type="radio" id="1P" name="numPlayers" onclick="radioClicked(1)" value="1" checked="true">
-    <label for="1P">1 Player</label>
-    <input type="radio" id="2P" name="numPlayers" onclick="radioClicked(2)" value="2">
-    <label for="2P">2 Players</label>
-    <br>
+    <label for="P1human">P1 Human</label>
+    <input type="checkbox" id="P1human" onclick="setHuman()" checked="true">
+
     <div id="P1MM" style="display: none;">
         <label for="P1miniMax">P1 Use MiniMax (uses MCTS otherwise)</label>
         <input type="checkbox" id="P1miniMax" onclick="setDepthVisibility()" checked="true">
     </div>
+
+    <br>
+
+    <label for="P2human">P2 Human</label>
+    <input type="checkbox" id="P2human" onclick="setHuman()">
+
     <div id="P2MM" style="display: inline;">
         <label for="P2miniMax">P2 Use MiniMax (uses MCTS otherwise)</label>
         <input type="checkbox" id="P2miniMax" onclick="setDepthVisibility()" checked="true">
     </div>
+
     <br>
+    
     <label for="width">Width:</label>
     <input type="text" id="width" value="7">
     <label for="width">Height:</label>
