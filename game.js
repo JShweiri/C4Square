@@ -358,35 +358,105 @@ function checkWin(board, player) {
 
 
 
+scoresRecorded = {}
+timesVisited = {}
 
-function playoutValue(board, currentPlayer) {
+C = 0.5;
+
+function heuristic_value(board) {
+
+    let hashedBoard = JSON.stringify(board);
+
+    N = timesVisited["total"];
+
+    if (timesVisited[hashedBoard] == undefined) {
+        timesVisited[hashedBoard] = 0.00001;
+    }
+
+    Ni = timesVisited[hashedBoard];
+
+    if (scoresRecorded[hashedBoard] == undefined) {
+        scoresRecorded[hashedBoard] = 0;
+    }
+
+    V = scoresRecorded[hashedBoard] / Ni;
+
+    return V + C * (Math.log(N) / Ni);
+}
+
+function record(board, score) {
+
+    if (timesVisited["total"] == undefined) {
+        timesVisited["total"] = 0;
+    }
+    timesVisited["total"] += 1;
+
+    let hashedBoard = JSON.stringify(board);
+
+    if (timesVisited[hashedBoard] == undefined) {
+        timesVisited[hashedBoard] = 0;
+    }
+    timesVisited[hashedBoard] += 1;
+
+    if (scoresRecorded[hashedBoard] == undefined) {
+        scoresRecorded[hashedBoard] = 0;
+    }
+    scoresRecorded[hashedBoard] += score;
+}
+
+    
+function UCTPlayoutValue(board, currentPlayer) {
     let opposingPlayer = currentPlayer == BLACK_PIECE ? RED_PIECE : BLACK_PIECE;
-
-    //other player just went, check if they won or drew
-    if (checkWin(board, opposingPlayer)) {
-        return -1;
-    }
-    if (checkDraw(board)) {
-        return 0;
-    }
 
     let validLocations = getValidLocations(board);
 
-    let col = validLocations[Math.floor(Math.random() * validLocations.length)];
+    //other player just went, check if they won or drew
+    if (checkWin(board, opposingPlayer)) {
+        record(board, -1)
+        return -1;
+    }
+    if (checkDraw(board)) {
+        record(board, 0)
+        return 0;
+    }
 
-    board = makeMove(board, col, currentPlayer);
+    action_heuristic_dict = {}
 
-    value = -playoutValue(board, opposingPlayer);
+    for (let i = 0; i < validLocations.length; i++) {
+        let move = validLocations[i]
+        makeMove(board, move, currentPlayer);
+        action_heuristic_dict[move] = -heuristic_value(board);
+        // console.log(action_heuristic_dict[move])
+        record(board, action_heuristic_dict[move]);
+        undoMove(board, move, currentPlayer);
+    }
 
-    board = undoMove(board, col);
+    let etard = -Infinity;
+    let move = 0;//validLocations[Math.floor(Math.random() * validLocations.length)];
+    for (const [key, value] of Object.entries(action_heuristic_dict)) {
+        if (value > etard) {
+            etard = value;
+            move = key;
+        }
+    }
 
-    return value
+    makeMove(board, move, currentPlayer);
+
+    value = -UCTPlayoutValue(board, opposingPlayer);
+
+    undoMove(board, move, currentPlayer);
+
+    record(board, value);
+
+    return value;
+    
 }
+
 
 function monteCarloValue(board, currentPlayer, N) {
     scores = [];
     for (let i = 0; i < N; i++) {
-        scores.push(playoutValue(board, currentPlayer));
+        scores.push(UCTPlayoutValue(board, currentPlayer));
     }
     return scores.reduce((a, b) => a + b) / N;
 }
